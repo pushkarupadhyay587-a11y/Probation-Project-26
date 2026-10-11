@@ -4,8 +4,7 @@ from pydantic import BaseModel, Field, ConfigDict
 import pandas as pd
 import joblib
 
-BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "pipeline.pkl"
+
 
 app = FastAPI()
 
@@ -46,10 +45,7 @@ class UserInput(BaseModel):
         ]
         return df[expected_columns]
 
-if not MODEL_PATH.exists():
-    raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
-
-model = joblib.load(MODEL_PATH)
+model = joblib.load("pipeline.pkl")
 
 @app.get("/")
 def health():
@@ -58,9 +54,10 @@ def health():
 @app.post("/predict")
 def predict(payload: UserInput):
     result = model.predict(payload.to_dataframe())[0]
-    if isinstance(result, str):
-        return {"prediction": result}
-    return {"prediction": str(result)}
+    if not result :
+        return {"income":"<=50k"}
+    else :
+        return {"income":"<=50k"}
 
 
 
